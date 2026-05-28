@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moodboard Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Italiana&family=DM+Serif+Display:ital@0;1&family=Libre+Bodoni:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&family=Montserrat:wght@300;400;500;600&family=Karla:wght@300;400;500&family=Lato:wght@300;400;700&family=Work+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root {
+    --ui-bg: #f4f1ec;
+    --ui-card: #fbf9f5;
+    --ui-border: #e8e2d9;
+    --ui-text: #2c2821;
+    --ui-muted: #9a9089;
+    --ui-accent: #3d3530;
+    --mb-bg: #faf8f4;
+    --mb-ink: #1e1a17;
+    --mb-accent: #8c7b6e;
+    --mb-light: #f0ebe3;
+    --mb-warm: #e8ddd2;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Karla', sans-serif;
+    background: var(--ui-bg);
+    color: var(--ui-text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .app-header {
+    background: var(--ui-accent);
+    color: #f4f1ec;
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    letter-spacing: 0.15em;
+    font-size: 11px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+  .app-header span { opacity: 0.45; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    flex: 1;
+    overflow: hidden;
+    height: calc(100vh - 48px);
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    background: var(--ui-card);
+    border-right: 1px solid var(--ui-border);
+    overflow-y: auto;
+    padding: 24px 20px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--ui-border); border-radius: 2px; }
+
+  .section {
+    border-bottom: 1px solid var(--ui-border);
+    padding: 18px 0;
+  }
+  .section:last-child { border-bottom: none; }
+
+  .section-label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ui-muted);
+    margin-bottom: 14px;
+  }
+
+  label {
+    display: block;
+    font-size: 11px;
+    color: var(--ui-muted);
+    margin-bottom: 5px;
+    font-family: 'Karla', sans-serif;
+    letter-spacing: 0.04em;
+  }
+
+  input[type="text"], input[type="number"] {
+    width: 100%;
+    background: var(--ui-bg);
+    border: 1px solid var(--ui-border);
+    border-radius: 3px;
+    padding: 8px 10px;
+    font-size: 13px;
+    color: var(--ui-text);
+    font-family: 'Karla', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 10px;
+  }
+  input[type="text"]:focus, input[type="number"]:focus {
+    border-color: var(--ui-accent);
+  }
+
+  select {
+    width: 100%;
+    background: var(--ui-bg);
+    border: 1px solid var(--ui-border);
+    border-radius: 3px;
+    padding: 8px 10px;
+    font-size: 13px;
+    color: var(--ui-text);
+    font-family: 'Karla', sans-serif;
+    outline: none;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+
+  .color-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .color-row label { margin: 0; min-width: 70px; font-size: 11px; }
+  .color-row input[type="color"] {
+    width: 34px; height: 34px;
+    border: 1px solid var(--ui-border);
+    border-radius: 3px;
+    padding: 2px;
+    cursor: pointer;
+    background: white;
+    margin: 0;
+  }
+  .color-row input[type="text"] {
+    flex: 1; margin: 0; font-size: 12px;
+    font-family: 'Montserrat', sans-serif;
+    letter-spacing: 0.05em;
+  }
+
+  /* Button groups */
+  .btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+  .btn-group button {
+    background: var(--ui-bg);
+    border: 1px solid var(--ui-border);
+    border-radius: 2px;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    color: var(--ui-muted);
+    transition: all 0.15s;
+  }
+  .btn-group button:hover { border-color: var(--ui-accent); color: var(--ui-text); }
+  .btn-group button.active {
+    background: var(--ui-accent);
+    border-color: var(--ui-accent);
+    color: #f4f1ec;
+  }
+
+  /* Toggle */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .toggle-label {
+    font-size: 12px;
+    font-family: 'Karla', sans-serif;
+    color: var(--ui-text);
+  }
+  .toggle {
+    position: relative;
+    width: 36px; height: 20px;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--ui-border);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .toggle-slider:before {
+    content: '';
+    position: absolute;
+    width: 14px; height: 14px;
+    left: 3px; top: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.2s;
+  }
+  .toggle input:checked + .toggle-slider { background: var(--ui-accent); }
+  .toggle input:checked + .toggle-slider:before { transform: translateX(16px); }
+
+  /* Upload area */
+  .upload-area {
+    border: 1px dashed var(--ui-border);
+    border-radius: 3px;
+    padding: 14px;
+    text-align: center;
+    cursor: pointer;
+    background: var(--ui-bg);
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+    font-size: 11px;
+    color: var(--ui-muted);
+    font-family: 'Karla', sans-serif;
+  }
+  .upload-area:hover { border-color: var(--ui-accent); color: var(--ui-text); }
+  .upload-area.has-file { border-color: var(--ui-accent); color: var(--ui-text); }
+  .upload-area input { display: none; }
+
+  /* Palette preview */
+  .palette-preview {
+    display: flex;
+    gap: 6px;
+    margin: 10px 0;
+    align-items: center;
+  }
+  .palette-swatch {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.08);
+    transition: transform 0.2s;
+  }
+  .palette-swatch:hover { transform: scale(1.15); }
+
+  .hex-input-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .hex-input-row input[type="color"] {
+    width: 36px; height: 36px;
+    border: 1px solid var(--ui-border);
+    border-radius: 3px;
+    padding: 2px;
+    cursor: pointer;
+    flex-shrink: 0;
+    background: white;
+    margin: 0;
+  }
+  .hex-input-row input[type="text"] {
+    flex: 1; margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+  }
+
+  /* Generate button */
+  .btn-generate {
+    width: 100%;
+    background: var(--ui-accent);
+    color: #f4f1ec;
+    border: none;
+    border-radius: 3px;
+    padding: 13px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin-bottom: 8px;
+  }
+  .btn-generate:hover { opacity: 0.85; }
+
+  .btn-download {
+    width: 100%;
+    background: transparent;
+    color: var(--ui-accent);
+    border: 1px solid var(--ui-accent);
+    border-radius: 3px;
+    padding: 11px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: none;
+  }
+  .btn-download:hover { background: var(--ui-accent); color: #f4f1ec; }
+
+  /* MAIN / MOODBOARD AREA */
+  .main {
+    overflow-y: auto;
+    background: var(--ui-bg);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 32px;
+  }
+
+  .moodboard-wrap {
+    width: 100%;
+    max-width: 900px;
+  }
+
+  /* THE MOODBOARD */
+  #moodboard {
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: var(--mb-bg);
+    font-family: 'Cormorant Garamond', serif;
+    color: var(--mb-ink);
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    padding: 36px 40px 28px;
+    gap: 0;
+    position: relative;
+    border: 1px solid #e5dfd7;
+  }
+
+  /* MB Header */
+  .mb-header {
+    text-align: center;
+    position: relative;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--mb-accent);
+  }
+
+  .mb-studio-tag {
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-family: var(--mb-body-font, 'Montserrat'), sans-serif;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--mb-bg);
+    background: var(--mb-ink);
+    padding: 5px 10px;
+  }
+
+  .mb-logo-img {
+    position: absolute;
+    top: 0;
+    right: 0;
+    max-height: 36px;
+    max-width: 120px;
+    object-fit: contain;
+  }
+
+  .mb-title {
+    font-family: var(--mb-display-font, 'Cormorant Garamond'), serif;
+    font-size: 38px;
+    font-weight: 300;
+    letter-spacing: 0.22em;
+    line-height: 1.1;
+    color: var(--mb-ink);
+    text-transform: uppercase;
+  }
+
+  .mb-subtitle {
+    font-family: var(--mb-body-font, 'Montserrat'), sans-serif;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--mb-accent);
+    margin-top: 8px;
+  }
+
+  /* MB Body grid */
+  .mb-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 16px;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* Vision card */
+  .mb-vision {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .mb-section-title {
+    font-family: var(--mb-display-font, 'Cormorant Garamond'), serif;
+    font-size: 11px;
+    font-style: italic;
+    letter-spacing: 0.12em;
+    color: var(--mb-accent);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--mb-warm);
+  }
+
+  .mb-table { width: 100%; border-collapse: collapse; }
+  .mb-table tr td {
+    padding: 5px 0;
+    border-bottom: 1px solid var(--mb-light);
+    vertical-align: top;
+  }
+  .mb-table tr:last-child td { border-bottom: none; }
+  .mb-table .mb-label {
+    font-family: var(--mb-display-font, 'Cormorant Garamond'), serif;
+    font-style: italic;
+    font-size: 11px;
+    color: var(--mb-accent);
+    white-space: nowrap;
+    padding-right: 8px;
+    width: 40%;
+  }
+  .mb-table .mb-value {
+    font-family: var(--mb-body-font, 'Karla'), sans-serif;
+    font-size: 11px;
+    color: var(--mb-ink);
+    font-weight: 500;
+  }
+
+  .mb-palette-section { margin-top: 14px; }
+  .mb-palette-circles {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .mb-circle {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.06);
+    flex-shrink: 0;
+  }
+  .mb-swatches {
+    display: flex;
+    gap: 2px;
+    height: 8px;
+  }
+  .mb-swatch {
+    flex: 1;
+    height: 100%;
+  }
+
+  /* Photo grid - spans 2 columns */
+  .mb-photos {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 6px;
+    overflow: hidden;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .mb-photo-cell {
+    overflow: hidden;
+    min-width: 0;
+    min-height: 0;
+    background: var(--mb-warm);
+    position: relative;
+  }
+
+  .mb-photo-cell img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .mb-photo-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mb-display-font, 'Cormorant Garamond'), serif;
+    font-style: italic;
+    font-size: 11px;
+    color: var(--mb-accent);
+    opacity: 0.6;
+  }
+
+  /* Clothing card */
+  .mb-clothing {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mb-outfit-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--mb-light);
+  }
+  .mb-outfit-item:last-child { border-bottom: none; }
+
+  .mb-outfit-swatch {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.1);
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  .mb-outfit-text {}
+  .mb-outfit-piece {
+    font-family: var(--mb-display-font, 'Cormorant Garamond'), serif;
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--mb-ink);
+    line-height: 1.3;
+  }
+  .mb-outfit-details {
+    font-family: var(--mb-body-font, 'Karla'), sans-serif;
+    font-size: 10px;
+    color: var(--mb-accent);
+    line-height: 1.4;
+    margin-top: 1px;
+  }
+
+  /* MB Footer */
+  .mb-footer {
+    border-top: 1px solid var(--mb-warm);
+    padding-top: 12px;
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .mb-tags {
+    font-family: var(--mb-body-font, 'Montserrat'), sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: var(--mb-accent);
+    text-transform: uppercase;
+  }
+
+  .mb-credit {
+    font-family: var(--mb-body-font, 'Montserrat'), sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--mb-ink);
+    opacity: 0.5;
+  }
+
+  /* Loading state */
+  .loading-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(250,248,244,0.85);
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .loading-overlay.active { display: flex; }
+  .loading-spinner {
+    width: 28px; height: 28px;
+    border: 2px solid var(--mb-warm);
+    border-top-color: var(--mb-accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--mb-accent);
+  }
+
+  .status-msg {
+    font-size: 11px;
+    color: var(--ui-muted);
+    text-align: center;
+    padding: 6px 0;
+    font-family: 'Karla', sans-serif;
+    min-height: 20px;
+  }
+
+  .grid-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  /* Photo upload grid */
+  .photo-upload-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .photo-upload-cell {
+    aspect-ratio: 3/4;
+    border: 1px dashed var(--ui-border);
+    border-radius: 2px;
+    background: var(--ui-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .photo-upload-cell:hover { border-color: var(--ui-accent); }
+  .photo-upload-cell img { width: 100%; height: 100%; object-fit: cover; }
+  .photo-upload-cell .plus {
+    font-size: 20px;
+    color: var(--ui-border);
+    font-weight: 300;
+    line-height: 1;
+  }
+  .photo-upload-cell input { display: none; }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  Moodboard Generator <span>·</span> Fotografen-Studio
+</div>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <!-- BRANDING -->
+    <div class="section">
+      <div class="section-label">Branding</div>
+
+      <label>Logo-Upload (PNG/SVG)</label>
+      <div class="upload-area" id="logo-upload-area" onclick="document.getElementById('logo-input').click()">
+        <input type="file" id="logo-input" accept="image/png,image/svg+xml" onchange="handleLogoUpload(this)">
+        <span id="logo-label">Logo hochladen</span>
+      </div>
+
+      <label>Studio-Name</label>
+      <input type="text" id="studio-name" value="Studio Lumière" placeholder="Dein Studio-Name">
+
+      <div class="color-row">
+        <label>Hintergrund</label>
+        <input type="color" id="color-bg-picker" value="#faf8f4" oninput="syncColor('bg', this.value)">
+        <input type="text" id="color-bg-hex" value="#faf8f4" oninput="syncColorFromHex('bg', this.value)" maxlength="7">
+      </div>
+      <div class="color-row">
+        <label>Text</label>
+        <input type="color" id="color-ink-picker" value="#1e1a17" oninput="syncColor('ink', this.value)">
+        <input type="text" id="color-ink-hex" value="#1e1a17" oninput="syncColorFromHex('ink', this.value)" maxlength="7">
+      </div>
+      <div class="color-row">
+        <label>Akzent</label>
+        <input type="color" id="color-accent-picker" value="#8c7b6e" oninput="syncColor('accent', this.value)">
+        <input type="text" id="color-accent-hex" value="#8c7b6e" oninput="syncColorFromHex('accent', this.value)" maxlength="7">
+      </div>
+
+      <div class="grid-row" style="margin-top:4px">
+        <div>
+          <label>Display-Font</label>
+          <select id="font-display" onchange="updateFonts()">
+            <option value="'Cormorant Garamond', serif" selected>Cormorant Garamond</option>
+            <option value="'Playfair Display', serif">Playfair Display</option>
+            <option value="'Italiana', serif">Italiana</option>
+            <option value="'DM Serif Display', serif">DM Serif Display</option>
+            <option value="'Libre Bodoni', serif">Libre Bodoni</option>
+          </select>
+        </div>
+        <div>
+          <label>Body-Font</label>
+          <select id="font-body" onchange="updateFonts()">
+            <option value="'Inter', sans-serif">Inter</option>
+            <option value="'Montserrat', sans-serif" selected>Montserrat</option>
+            <option value="'Karla', sans-serif">Karla</option>
+            <option value="'Lato', sans-serif">Lato</option>
+            <option value="'Work Sans', sans-serif">Work Sans</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- INHALT -->
+    <div class="section">
+      <div class="section-label">Inhalt</div>
+      <label>Titel</label>
+      <input type="text" id="mb-title" value="Golden Hour" placeholder="Moodboard-Titel">
+      <label>Untertitel</label>
+      <input type="text" id="mb-subtitle" value="Familien-Shooting · Herbst 2025" placeholder="Untertitel">
+
+      <label>Basis-Farbe für Palette</label>
+      <div class="hex-input-row">
+        <input type="color" id="palette-picker" value="#c4a882" oninput="generatePalette(this.value)">
+        <input type="text" id="palette-hex" value="#c4a882" placeholder="#rrggbb" oninput="paletteHexInput(this.value)" maxlength="7">
+      </div>
+
+      <label>Aus Foto extrahieren</label>
+      <div class="upload-area" onclick="document.getElementById('color-photo-input').click()">
+        <input type="file" id="color-photo-input" accept="image/*" onchange="extractColorFromPhoto(this)">
+        Foto hochladen → Farbe extrahieren
+      </div>
+
+      <div class="palette-preview" id="palette-preview"></div>
+    </div>
+
+    <!-- SHOOTING -->
+    <div class="section">
+      <div class="section-label">Shooting</div>
+
+      <label>Location</label>
+      <div class="btn-group" id="location-group">
+        <button onclick="toggleBtn(this,'location-group')" data-val="Indoor">Indoor</button>
+        <button onclick="toggleBtn(this,'location-group')" data-val="Studio">Studio</button>
+        <button onclick="toggleBtn(this,'location-group')" data-val="Wiese" class="active">Wiese</button>
+        <button onclick="toggleBtn(this,'location-group')" data-val="Feld">Feld</button>
+        <button onclick="toggleBtn(this,'location-group')" data-val="Wald">Wald</button>
+        <button onclick="toggleBtn(this,'location-group')" data-val="Düne">Düne</button>
+      </div>
+
+      <label>Shooting-Art</label>
+      <div class="btn-group" id="art-group">
+        <button onclick="toggleBtn(this,'art-group')" data-val="Familie" class="active">Familie</button>
+        <button onclick="toggleBtn(this,'art-group')" data-val="Newborn">Newborn</button>
+        <button onclick="toggleBtn(this,'art-group')" data-val="Babybauch">Babybauch</button>
+        <button onclick="toggleBtn(this,'art-group')" data-val="Business">Business</button>
+        <button onclick="toggleBtn(this,'art-group')" data-val="Hochzeit">Hochzeit</button>
+        <button onclick="toggleBtn(this,'art-group')" data-val="Paar">Paar</button>
+      </div>
+
+      <label>Stilrichtung</label>
+      <div class="btn-group" id="style-group">
+        <button onclick="toggleBtn(this,'style-group')" data-val="Clean">Clean</button>
+        <button onclick="toggleBtn(this,'style-group')" data-val="Boho" class="active">Boho</button>
+        <button onclick="toggleBtn(this,'style-group')" data-val="Chic">Chic</button>
+        <button onclick="toggleBtn(this,'style-group')" data-val="Editorial">Editorial</button>
+        <button onclick="toggleBtn(this,'style-group')" data-val="Vintage">Vintage</button>
+        <button onclick="toggleBtn(this,'style-group')" data-val="Modern">Modern</button>
+      </div>
+    </div>
+
+    <!-- BILDER -->
+    <div class="section">
+      <div class="section-label">Bilder</div>
+      <div class="toggle-row">
+        <span class="toggle-label">Unsplash-Inspiration</span>
+        <label class="toggle">
+          <input type="checkbox" id="use-unsplash" checked onchange="toggleImageMode()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-label">Eigene Bilder</span>
+        <label class="toggle">
+          <input type="checkbox" id="use-own" onchange="toggleImageMode()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div id="own-photos-area" style="display:none">
+        <div class="photo-upload-grid">
+          <div class="photo-upload-cell" onclick="document.getElementById('photo-0').click()" id="cell-0">
+            <input type="file" id="photo-0" accept="image/*" onchange="handlePhotoUpload(0, this)">
+            <span class="plus">+</span>
+          </div>
+          <div class="photo-upload-cell" onclick="document.getElementById('photo-1').click()" id="cell-1">
+            <input type="file" id="photo-1" accept="image/*" onchange="handlePhotoUpload(1, this)">
+            <span class="plus">+</span>
+          </div>
+          <div class="photo-upload-cell" onclick="document.getElementById('photo-2').click()" id="cell-2">
+            <input type="file" id="photo-2" accept="image/*" onchange="handlePhotoUpload(2, this)">
+            <span class="plus">+</span>
+          </div>
+          <div class="photo-upload-cell" onclick="document.getElementById('photo-3').click()" id="cell-3">
+            <input type="file" id="photo-3" accept="image/*" onchange="handlePhotoUpload(3, this)">
+            <span class="plus">+</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLOTHING KI -->
+    <div class="section">
+      <div class="section-label">Outfit-Inspiration</div>
+      <div class="toggle-row">
+        <span class="toggle-label">Via KI generieren</span>
+        <label class="toggle">
+          <input type="checkbox" id="use-ki" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <p style="font-size:11px;color:var(--ui-muted);line-height:1.5;">Outfit-Vorschläge passend zu Stil, Shooting und Farbpalette werden via Claude generiert.</p>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="section" style="border:none; padding-top:8px">
+      <button class="btn-generate" onclick="generateMoodboard()">Moodboard generieren</button>
+      <button class="btn-download" id="btn-download" onclick="downloadPNG()">PNG herunterladen</button>
+      <div class="status-msg" id="status-msg"></div>
+    </div>
+
+  </div>
+
+  <!-- MAIN AREA -->
+  <div class="main">
+    <div class="moodboard-wrap">
+      <div id="moodboard" style="position:relative">
+        <!-- HEADER -->
+        <div class="mb-header">
+          <div id="mb-studio-el" class="mb-studio-tag">Studio Lumière</div>
+          <div class="mb-title" id="mb-title-el">GOLDEN HOUR</div>
+          <div class="mb-subtitle" id="mb-subtitle-el">Familien-Shooting · Herbst 2025</div>
+        </div>
+
+        <!-- BODY -->
+        <div class="mb-body">
+          <!-- Vision -->
+          <div class="mb-vision">
+            <div class="mb-section-title">Vision</div>
+            <table class="mb-table">
+              <tr>
+                <td class="mb-label">Stil</td>
+                <td class="mb-value" id="mbv-stil">Boho</td>
+              </tr>
+              <tr>
+                <td class="mb-label">Shooting</td>
+                <td class="mb-value" id="mbv-art">Familie</td>
+              </tr>
+              <tr>
+                <td class="mb-label">Location</td>
+                <td class="mb-value" id="mbv-loc">Wiese</td>
+              </tr>
+              <tr>
+                <td class="mb-label">Stimmung</td>
+                <td class="mb-value" id="mbv-mood">Warm &amp; Natürlich</td>
+              </tr>
+            </table>
+
+            <div class="mb-palette-section">
+              <div class="mb-section-title" style="margin-top:10px">Farbpalette</div>
+              <div class="mb-palette-circles" id="mb-circles">
+                <div class="mb-circle" style="background:#e8dccf"></div>
+                <div class="mb-circle" style="background:#d4c4b0"></div>
+                <div class="mb-circle" style="background:#c4a882"></div>
+                <div class="mb-circle" style="background:#a08060"></div>
+                <div class="mb-circle" style="background:#7a6048"></div>
+              </div>
+              <div class="mb-swatches" id="mb-swatches">
+                <div class="mb-swatch" style="background:#e8dccf"></div>
+                <div class="mb-swatch" style="background:#d4c4b0"></div>
+                <div class="mb-swatch" style="background:#c4a882"></div>
+                <div class="mb-swatch" style="background:#a08060"></div>
+                <div class="mb-swatch" style="background:#7a6048"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Photos 2x2 -->
+          <div class="mb-photos" id="mb-photos">
+            <div class="mb-photo-cell" id="mb-photo-0"><div class="mb-photo-placeholder">Bild 1</div></div>
+            <div class="mb-photo-cell" id="mb-photo-1"><div class="mb-photo-placeholder">Bild 2</div></div>
+            <div class="mb-photo-cell" id="mb-photo-2"><div class="mb-photo-placeholder">Bild 3</div></div>
+            <div class="mb-photo-cell" id="mb-photo-3"><div class="mb-photo-placeholder">Bild 4</div></div>
+          </div>
+
+          <!-- Clothing -->
+          <div class="mb-clothing">
+            <div class="mb-section-title">Outfits</div>
+            <div id="mb-outfits">
+              <div class="mb-outfit-item">
+                <div class="mb-outfit-swatch" style="background:#c4a882"></div>
+                <div class="mb-outfit-text">
+                  <div class="mb-outfit-piece">Moodboard generieren</div>
+                  <div class="mb-outfit-details">um Outfit-Vorschläge zu sehen</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="mb-footer">
+          <div class="mb-tags" id="mb-tags">Boho · Familie · Wiese</div>
+          <div class="mb-credit" id="mb-credit">Curated by Studio Lumière · 2025</div>
+        </div>
+
+        <div class="loading-overlay" id="loading-overlay">
+          <div class="loading-spinner"></div>
+          <div class="loading-text">Wird erstellt …</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<canvas id="color-canvas" style="display:none"></canvas>
+
+<script>
+// ===== STATE =====
+let logoBase64 = null;
+let userPhotos = [null, null, null, null];
+let currentPalette = ['#e8dccf','#d4c4b0','#c4a882','#a08060','#7a6048'];
+
+// ===== COLOR SYNC =====
+function syncColor(which, val) {
+  document.getElementById(`color-${which}-hex`).value = val;
+  applyBranding();
+}
+function syncColorFromHex(which, val) {
+  if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+    document.getElementById(`color-${which}-picker`).value = val;
+    applyBranding();
+  }
+}
+function applyBranding() {
+  const mb = document.getElementById('moodboard');
+  mb.style.setProperty('--mb-bg', document.getElementById('color-bg-hex').value);
+  mb.style.setProperty('--mb-ink', document.getElementById('color-ink-hex').value);
+  mb.style.setProperty('--mb-accent', document.getElementById('color-accent-hex').value);
+}
+
+// ===== FONTS =====
+function updateFonts() {
+  const mb = document.getElementById('moodboard');
+  mb.style.setProperty('--mb-display-font', document.getElementById('font-display').value);
+  mb.style.setProperty('--mb-body-font', document.getElementById('font-body').value);
+  // Update all elements using these fonts
+  document.querySelectorAll('.mb-title, .mb-section-title, .mb-label, .mb-outfit-piece, .mb-table .mb-label').forEach(el => {
+    el.style.fontFamily = document.getElementById('font-display').value;
+  });
+  document.querySelectorAll('.mb-subtitle, .mb-tags, .mb-credit, .mb-studio-tag, .mb-value, .mb-outfit-details').forEach(el => {
+    el.style.fontFamily = document.getElementById('font-body').value;
+  });
+}
+
+// ===== LOGO =====
+function handleLogoUpload(input) {
+  if (!input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    logoBase64 = e.target.result;
+    document.getElementById('logo-label').textContent = input.files[0].name;
+    document.getElementById('logo-upload-area').classList.add('has-file');
+    renderStudioTag();
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function renderStudioTag() {
+  const el = document.getElementById('mb-studio-el');
+  if (logoBase64) {
+    el.innerHTML = `<img src="${logoBase64}" class="mb-logo-img" alt="Logo">`;
+    el.className = '';
+    el.style.cssText = 'position:absolute;top:0;right:0;';
+  } else {
+    el.innerHTML = document.getElementById('studio-name').value || 'Studio';
+    el.className = 'mb-studio-tag';
+    el.style.cssText = '';
+  }
+}
+
+document.getElementById('studio-name').addEventListener('input', renderStudioTag);
+
+// ===== PALETTE =====
+function hexToHsl(hex) {
+  let r = parseInt(hex.slice(1,3),16)/255;
+  let g = parseInt(hex.slice(3,5),16)/255;
+  let b = parseInt(hex.slice(5,7),16)/255;
+  const max = Math.max(r,g,b), min = Math.min(r,g,b);
+  let h, s, l = (max+min)/2;
+  if (max === min) { h = s = 0; }
+  else {
+    const d = max - min;
+    s = l > 0.5 ? d/(2-max-min) : d/(max+min);
+    switch(max) {
+      case r: h = (g-b)/d + (g<b?6:0); break;
+      case g: h = (b-r)/d + 2; break;
+      case b: h = (r-g)/d + 4; break;
+    }
+    h /= 6;
+  }
+  return [Math.round(h*360), Math.round(s*100), Math.round(l*100)];
+}
+
+function hslToHex(h, s, l) {
+  s /= 100; l /= 100;
+  const a = s * Math.min(l, 1-l);
+  const f = n => {
+    const k = (n+h/30) % 12;
+    const color = l - a * Math.max(Math.min(k-3,9-k,1),-1);
+    return Math.round(255*color).toString(16).padStart(2,'0');
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+function generatePalette(hex) {
+  document.getElementById('palette-hex').value = hex;
+  document.getElementById('palette-picker').value = hex;
+  if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return;
+  const [h, s, l] = hexToHsl(hex);
+  const palette = [
+    hslToHex(h, Math.max(s-15,5), Math.min(l+25,92)),
+    hslToHex(h, Math.max(s-8,5), Math.min(l+12,85)),
+    hex,
+    hslToHex(h, Math.min(s+5,100), Math.max(l-15,8)),
+    hslToHex(h, Math.min(s+10,100), Math.max(l-28,5)),
+  ];
+  currentPalette = palette;
+  renderPalettePreview();
+  updateMoodboardPalette();
+}
+
+function paletteHexInput(val) {
+  document.getElementById('palette-picker').value = val.length === 7 ? val : '#000000';
+  if (/^#[0-9a-fA-F]{6}$/.test(val)) generatePalette(val);
+}
+
+function renderPalettePreview() {
+  const el = document.getElementById('palette-preview');
+  el.innerHTML = currentPalette.map(c =>
+    `<div class="palette-swatch" style="background:${c}" title="${c}"></div>`
+  ).join('');
+}
+
+function updateMoodboardPalette() {
+  const circles = document.getElementById('mb-circles');
+  const swatches = document.getElementById('mb-swatches');
+  circles.innerHTML = currentPalette.map(c =>
+    `<div class="mb-circle" style="background:${c}"></div>`
+  ).join('');
+  swatches.innerHTML = currentPalette.map(c =>
+    `<div class="mb-swatch" style="background:${c}"></div>`
+  ).join('');
+}
+
+function extractColorFromPhoto(input) {
+  if (!input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.getElementById('color-canvas');
+      canvas.width = 50; canvas.height = 50;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, 50, 50);
+      const data = ctx.getImageData(0, 0, 50, 50).data;
+      let r=0, g=0, b=0, count=0;
+      for (let i=0; i<data.length; i+=16) {
+        r += data[i]; g += data[i+1]; b += data[i+2]; count++;
+      }
+      r = Math.round(r/count); g = Math.round(g/count); b = Math.round(b/count);
+      const hex = `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
+      generatePalette(hex);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+// ===== BUTTON GROUPS =====
+function toggleBtn(btn, groupId) {
+  document.querySelectorAll(`#${groupId} button`).forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function getSelected(groupId) {
+  const btn = document.querySelector(`#${groupId} button.active`);
+  return btn ? btn.dataset.val : '';
+}
+
+// ===== IMAGE MODE =====
+function toggleImageMode() {
+  const useOwn = document.getElementById('use-own').checked;
+  document.getElementById('own-photos-area').style.display = useOwn ? 'block' : 'none';
+}
+
+// ===== OWN PHOTOS =====
+function handlePhotoUpload(idx, input) {
+  if (!input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    userPhotos[idx] = e.target.result;
+    const cell = document.getElementById(`cell-${idx}`);
+    cell.innerHTML = `<input type="file" id="photo-${idx}" accept="image/*" onchange="handlePhotoUpload(${idx}, this)"><img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+// ===== MOOD MAPPING =====
+const moodMap = {
+  'Clean': 'Klar & Zeitlos', 'Boho': 'Warm & Natürlich', 'Chic': 'Elegant & Edel',
+  'Editorial': 'Dramatisch & Mutig', 'Vintage': 'Nostalgisch & Weich', 'Modern': 'Frisch & Minimalistisch'
+};
+
+// ===== GENERATE MOODBOARD =====
+async function generateMoodboard() {
+  const location = getSelected('location-group');
+  const art = getSelected('art-group');
+  const stil = getSelected('style-group');
+  const title = document.getElementById('mb-title').value;
+  const subtitle = document.getElementById('mb-subtitle').value;
+  const studioName = document.getElementById('studio-name').value || 'Studio';
+
+  setStatus('Erstelle Moodboard …');
+  document.getElementById('loading-overlay').classList.add('active');
+
+  // Update text content
+  document.getElementById('mb-title-el').textContent = (title || 'Moodboard').toUpperCase();
+  document.getElementById('mb-subtitle-el').textContent = subtitle || '';
+  document.getElementById('mbv-stil').textContent = stil || '–';
+  document.getElementById('mbv-art').textContent = art || '–';
+  document.getElementById('mbv-loc').textContent = location || '–';
+  document.getElementById('mbv-mood').textContent = moodMap[stil] || 'Authentisch';
+  document.getElementById('mb-tags').textContent = [stil, art, location].filter(Boolean).join(' · ');
+  document.getElementById('mb-credit').textContent = `Curated by ${studioName} · ${new Date().getFullYear()}`;
+
+  renderStudioTag();
+  applyBranding();
+  updateFonts();
+
+  // Palette
+  updateMoodboardPalette();
+
+  // Photos
+  await loadPhotos(stil, art, location);
+
+  // Outfits
+  const useKI = document.getElementById('use-ki').checked;
+  if (useKI) {
+    setStatus('Generiere Outfit-Vorschläge …');
+    await generateOutfits(stil, art, location);
+  }
+
+  document.getElementById('loading-overlay').classList.remove('active');
+  document.getElementById('btn-download').style.display = 'block';
+  setStatus('✓ Moodboard erstellt');
+  setTimeout(() => setStatus(''), 3000);
+}
+
+// ===== PHOTOS =====
+async function loadPhotos(stil, art, location) {
+  const useOwn = document.getElementById('use-own').checked;
+  const useUnsplash = document.getElementById('use-unsplash').checked;
+
+  const keywords = [
+    art?.toLowerCase() || 'family',
+    location?.toLowerCase() || 'nature',
+    stil?.toLowerCase() || 'lifestyle',
+    'photography'
+  ].join(',');
+
+  const placeholders = ['Bild 1','Bild 2','Bild 3','Bild 4'];
+
+  for (let i = 0; i < 4; i++) {
+    const cell = document.getElementById(`mb-photo-${i}`);
+    let src = null;
+
+    if (useOwn && userPhotos[i]) {
+      src = userPhotos[i];
+    } else if (useUnsplash) {
+      const seed = Date.now() + i * 1000;
+      src = `https://source.unsplash.com/600x800/?${encodeURIComponent(keywords)}&sig=${seed}`;
+    }
+
+    if (src) {
+      cell.innerHTML = `<img src="${src}" alt="Photo ${i+1}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.parentNode.innerHTML='<div class=\\'mb-photo-placeholder\\'>${placeholders[i]}</div>'">`;
+    } else {
+      cell.innerHTML = `<div class="mb-photo-placeholder">${placeholders[i]}</div>`;
+    }
+  }
+}
+
+// ===== OUTFITS VIA API =====
+async function generateOutfits(stil, art, location) {
+  const palette = currentPalette.join(', ');
+
+  const personen = {
+    'Familie': ['Mama', 'Papa', 'Kind'],
+    'Paar': ['Person 1', 'Person 2'],
+    'Hochzeit': ['Braut', 'Bräutigam'],
+    'Newborn': ['Mama', 'Papa'],
+    'Babybauch': ['Mama'],
+    'Business': ['Hauptperson']
+  };
+  const persons = personen[art] || ['Hauptperson'];
+
+  const prompt = `Du bist ein Modestylist für professionelle Foto-Shootings.
+Erstelle 4 Outfit-Vorschläge für ein ${art}-Shooting im ${stil}-Stil, Location: ${location}.
+Farbpalette: ${palette}.
+Personen: ${persons.join(', ')}.
+Bei mehreren Personen verteile die Outfits auf die Personen.
+
+Antworte NUR mit einem JSON-Array ohne Markdown, kein Kommentar, kein Text davor oder danach:
+[{"piece":"Outfit-Name für Person","details":"Material, Schnitt max 12 Wörter","color_hex":"#xxxxxx"},...]
+
+4 Items total. Die Farben müssen zur Palette passen.`;
+
+  try {
+    const response = await fetch('/api/clothing', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!response.ok) throw new Error('API error');
+    const data = await response.json();
+    const text = data.content?.[0]?.text || '';
+
+    let outfits;
+    try {
+      // Strip any markdown fences if present
+      const clean = text.replace(/```json?/g,'').replace(/```/g,'').trim();
+      outfits = JSON.parse(clean);
+    } catch {
+      throw new Error('JSON parse failed');
+    }
+
+    renderOutfits(outfits);
+  } catch(err) {
+    console.warn('API failed, using fallback:', err);
+    renderOutfits(getStaticOutfits(stil, art));
+  }
+}
+
+function getStaticOutfits(stil, art) {
+  const stilMap = {
+    'Boho': [
+      { piece: 'Mama · Leinenkleid', details: 'Fließend, V-Ausschnitt, natürlicher Leinenstoff', color_hex: currentPalette[2] },
+      { piece: 'Papa · Leinenshirt', details: 'Locker, ungefüttert, gebuttend', color_hex: currentPalette[3] },
+      { piece: 'Kind · Tunika', details: 'Baumwolle, luftig, mit Stickerei', color_hex: currentPalette[1] },
+      { piece: 'Accessoires', details: 'Makramee, Blumenkranz, Bastkorb', color_hex: currentPalette[4] }
+    ],
+    'Clean': [
+      { piece: 'Helles Midi-Kleid', details: 'Strukturierter Stoff, A-Linie, schlicht', color_hex: currentPalette[0] },
+      { piece: 'Weiße Chino', details: 'Slim Fit, Baumwolle, ungefüttert', color_hex: currentPalette[1] },
+      { piece: 'Minimales Oberteil', details: 'Crème, Rundhals, weicher Jersey', color_hex: currentPalette[2] },
+      { piece: 'Neutrale Accessoires', details: 'Ledersandalen, schlichte Tasche', color_hex: currentPalette[3] }
+    ],
+    'Chic': [
+      { piece: 'Seiden-Bluse', details: 'Cremig, weich fließend, leicht transparent', color_hex: currentPalette[0] },
+      { piece: 'Marlene-Hose', details: 'Weiter Schnitt, hohe Taille, Wollmischung', color_hex: currentPalette[3] },
+      { piece: 'Structured Blazer', details: 'Tailliert, einreihig, Woll-Crepe', color_hex: currentPalette[4] },
+      { piece: 'Statement-Accessoires', details: 'Gold-Schmuck, Satin-Schuhe', color_hex: currentPalette[2] }
+    ],
+  };
+  return stilMap[stil] || stilMap['Boho'];
+}
+
+function renderOutfits(outfits) {
+  const container = document.getElementById('mb-outfits');
+  container.innerHTML = outfits.map(o => `
+    <div class="mb-outfit-item">
+      <div class="mb-outfit-swatch" style="background:${o.color_hex || currentPalette[2]}"></div>
+      <div class="mb-outfit-text">
+        <div class="mb-outfit-piece">${escHtml(o.piece)}</div>
+        <div class="mb-outfit-details">${escHtml(o.details)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ===== DOWNLOAD =====
+async function downloadPNG() {
+  setStatus('Exportiere PNG …');
+  const mb = document.getElementById('moodboard');
+  try {
+    const canvas = await html2canvas(mb, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: null,
+      logging: false
+    });
+    const link = document.createElement('a');
+    link.download = `moodboard-${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    setStatus('✓ PNG heruntergeladen');
+    setTimeout(() => setStatus(''), 3000);
+  } catch(e) {
+    setStatus('Export fehlgeschlagen. Bitte erneut versuchen.');
+    console.error(e);
+  }
+}
+
+// ===== UTILS =====
+function setStatus(msg) {
+  document.getElementById('status-msg').textContent = msg;
+}
+
+// ===== INIT =====
+generatePalette('#c4a882');
+renderPalettePreview();
+updateFonts();
+</script>
+</body>
+</html>
